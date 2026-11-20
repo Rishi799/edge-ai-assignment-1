@@ -16,10 +16,20 @@ target = "days_left"
 all_cols = features + [target]
 
 # 2. Histogram of every column
-plt.figure(figsize=(14, 8))
+plt.figure(figsize=(15, 9))
 for i, col in enumerate(all_cols, 1):
     plt.subplot(2, 3, i)
-    plt.hist(df[col], bins=30, color='skyblue', edgecolor='black', alpha=0.7)
+    if col == "age_months":
+        bins = np.arange(df[col].min() - 0.5, df[col].max() + 1.5, 1)
+        plt.hist(df[col], bins=bins, color='skyblue', edgecolor='black', alpha=0.7, rwidth=0.85)
+        plt.xticks(np.arange(0, int(df[col].max()) + 1, 5))
+    elif col == "rings_per_day":
+        bins = np.arange(df[col].min() - 0.5, df[col].max() + 1.5, 1)
+        plt.hist(df[col], bins=bins, color='skyblue', edgecolor='black', alpha=0.7, rwidth=0.85)
+        plt.xticks(np.arange(0, int(df[col].max()) + 1, 5))
+    else:
+        plt.hist(df[col], bins=35, color='skyblue', edgecolor='black', alpha=0.7)
+    
     plt.title(f"Histogram of {col}")
     plt.xlabel(col)
     plt.ylabel("Count")
@@ -31,7 +41,7 @@ plt.close()
 print("Saved histograms.png")
 
 # 3. Scatter plots: days_left against each input
-plt.figure(figsize=(15, 6))
+plt.figure(figsize=(16, 5))
 for i, col in enumerate(features, 1):
     plt.subplot(1, 5, i)
     plt.scatter(df[col], df[target], alpha=0.5, s=15, color='coral')
@@ -50,4 +60,3 @@ artifact_dir = r"C:\Users\user\.gemini\antigravity\brain\90d4f7d4-e92e-47e8-a521
 os.makedirs(artifact_dir, exist_ok=True)
 shutil.copy("histograms.png", os.path.join(artifact_dir, "histograms.png"))
 shutil.copy("scatter_vs_days_left.png", os.path.join(artifact_dir, "scatter_vs_days_left.png"))
-print("Copied images to artifact directory.")

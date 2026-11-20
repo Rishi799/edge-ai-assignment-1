@@ -1,11 +1,12 @@
 import os
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 # Load untouched raw data
 df = pd.read_csv("data/team_16_train.csv")
 
-output_dir = "graphs"
+output_dir = os.path.join("graphs", "updated")
 os.makedirs(output_dir, exist_ok=True)
 
 features = ["battery_v", "temp_c", "rings_per_day", "wifi_rssi_dbm", "age_months"]
@@ -14,8 +15,20 @@ all_cols = features + [target]
 
 # 1. Individual Histograms
 for col in all_cols:
-    plt.figure(figsize=(7, 5))
-    plt.hist(df[col], bins=35, color='#3498db', edgecolor='black', alpha=0.75)
+    plt.figure(figsize=(8, 5))
+    if col == "age_months":
+        # 1 bin per integer (0 to 36)
+        bins = np.arange(df[col].min() - 0.5, df[col].max() + 1.5, 1)
+        plt.hist(df[col], bins=bins, color='#3498db', edgecolor='black', alpha=0.75, rwidth=0.85)
+        plt.xticks(np.arange(0, int(df[col].max()) + 1, 2))
+    elif col == "rings_per_day":
+        # 1 bin per integer (0 to 37)
+        bins = np.arange(df[col].min() - 0.5, df[col].max() + 1.5, 1)
+        plt.hist(df[col], bins=bins, color='#3498db', edgecolor='black', alpha=0.75, rwidth=0.85)
+        plt.xticks(np.arange(0, int(df[col].max()) + 1, 2))
+    else:
+        plt.hist(df[col], bins=35, color='#3498db', edgecolor='black', alpha=0.75)
+    
     plt.title(f"Histogram of {col} (Raw Data)", fontsize=13, fontweight='bold')
     plt.xlabel(col, fontsize=11)
     plt.ylabel("Frequency", fontsize=11)
@@ -40,4 +53,4 @@ for col in features:
     plt.close()
     print(f"Saved {file_path}")
 
-print("All individual graphs generated successfully in 'graphs/' folder.")
+print("Updated individual graphs successfully.")
