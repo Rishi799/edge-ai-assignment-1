@@ -58,11 +58,17 @@ app = FastAPI(title="Doorbell battery API")
 ms = lambda t0: round((time.perf_counter() - t0) * 1000, 3)
 
 
-@app.get("/model_info")
-def model_info():
+# ESP32-S3 has about 300 KB of SRAM free for our program. 1 KB = 1024 bytes (memory sizes are
+# powers of two), so the budget is 300 * 1024 = 307,200 bytes.
+SRAM_BUDGET_BYTES = 300 * 1024
+
+
+def describe(network):
+    """Per-layer table for ANY BatteryNet, read from the network itself (used by /model_info
+    and by the Mission 4 width table, so both always count the same way)."""
     layers = []
 
-    for layer in net.net:
+    for layer in network.net:
         if not isinstance(layer, torch.nn.Linear):
             continue
 
@@ -80,13 +86,23 @@ def model_info():
             "macs": macs,
         })
 
-    # TODO Mission 4: report total_bytes_int8 and both 300 KB SRAM fit checks.
+    total_params = sum(layer["params"] for layer in layers)
+    total_bytes_f32 = sum(layer["bytes_f32"] for layer in layers)  # 4 bytes per parameter
+    total_bytes_int8 = total_params                                  # 1 byte per parameter
     return {
         "layers": layers,
-        "total_params": sum(layer["params"] for layer in layers),
-        "total_bytes_f32": sum(layer["bytes_f32"] for layer in layers),
+        "total_params": total_params,
+        "total_bytes_f32": total_bytes_f32,
+        "total_bytes_int8": total_bytes_int8,
         "total_macs": sum(layer["macs"] for layer in layers),
+        "fits_300kb_sram_f32": total_bytes_f32 <= SRAM_BUDGET_BYTES,
+        "fits_300kb_sram_int8": total_bytes_int8 <= SRAM_BUDGET_BYTES,
     }
+
+
+@app.get("/model_info")
+def model_info():
+    return describe(net)
 
 
 @app.get("/health")

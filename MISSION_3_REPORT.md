@@ -52,7 +52,24 @@ from our data's min and max, so a real reading slightly outside our data still g
 | `battery_v: 3.30` (real, below our data) | 200 | **200** |
 | Batch with one glitch row | 422 | **422** (the whole batch is refused) |
 
-✏️ **TO FILL:** screenshots of three 422 replies from `/docs`.
+Repeatable evidence: `python client/test_glitches.py --url http://127.0.0.1:8000`
+```
+OK   normal reading                           expected 200, got 200  days_left=139.72
+OK   battery_v 0 V (glitch in our data)       expected 422, got 422  ['battery_v'] Input should be greater than or equal to 2.5
+OK   temp_c -127 C (glitch in our data)       expected 422, got 422  ['temp_c'] Input should be greater than or equal to -40
+OK   wifi_rssi_dbm 0 (glitch in our data)     expected 422, got 422  ['wifi_rssi_dbm'] Input should be less than or equal to -10
+OK   rings_per_day -3                         expected 422, got 422  ['rings_per_day'] Input should be greater than or equal to 0
+OK   age_months -1                            expected 422, got 422  ['age_months'] Input should be greater than or equal to 0
+OK   age_months missing                       expected 422, got 422  ['age_months'] Field required
+OK   temp_c is text                           expected 422, got 422  ['temp_c'] Input should be a valid number, unable to parse string as a number
+OK   temp_c NaN                               expected 422, got 422  ['temp_c'] Input should be a finite number
+OK   heatwave 49 C (real, outside our data)   expected 200, got 200  days_left=57.46
+OK   battery 3.30 V (real, below our data)    expected 200, got 200  days_left=0.0
+OK   bench.py extremes                        expected 200, got 200  days_left=2.83
+
+12/12 as expected
+```
+Optional: screenshots of three 422 replies from `/docs`.
 
 **Bug found while testing:** `NaN` was first answered with **500 Internal Server Error**, not 422.
 The rule had worked: Pydantic refused NaN. But the 422 reply copied the bad input back
