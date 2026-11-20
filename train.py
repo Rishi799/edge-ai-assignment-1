@@ -26,7 +26,11 @@ hidden = tuple(int(h) for h in a.hidden.split(","))
 df = pd.read_csv(f"data/team_{a.team:02d}_train.csv")
 # TODO Mission 1: find the sensor glitches (plot every column first!) and write a rule that
 # marks them. Say in your report how many you found and why each rule is safe.
-bad = np.zeros(len(df), dtype=bool)
+bad = (
+    (df["battery_v"] <= 0)
+    | (df["temp_c"] < -20)
+    | (df["wifi_rssi_dbm"] >= 0)
+)
 print(f"{len(df)} rows, {bad.sum()} glitch rows dropped")
 df = df[~bad]
 
