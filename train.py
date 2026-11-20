@@ -44,8 +44,12 @@ mu, sd = np.zeros(X.shape[1], np.float32), np.ones(X.shape[1], np.float32)
 
 mae = lambda p, t: float(np.mean(np.abs(p - t)))
 print(f"baseline (predict the mean): {mae(np.full_like(yv, y.mean()), yv):.2f} days")
-# TODO Mission 1: a straight-line model (linear regression) as the second baseline.
-# Use np.linalg.lstsq on [X, 1]. Print its validation MAE the same way as the line above.
+
+X_train_linear = np.column_stack((X, np.ones(len(X))))
+X_val_linear = np.column_stack((Xv, np.ones(len(Xv))))
+coefficients, _, _, _ = np.linalg.lstsq(X_train_linear, y, rcond=None)
+linear_predictions = X_val_linear @ coefficients
+print(f"baseline (linear regression): {mae(linear_predictions, yv):.2f} days")
 
 torch.manual_seed(0)
 net = BatteryNet(hidden)
