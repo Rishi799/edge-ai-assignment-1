@@ -2,13 +2,15 @@
 train.py -- STARTER. Clean the data, fit baselines, train the network, save it for the server.
 
     python train.py --team 7 --hidden 32,32
-Writes model/model.pt and model/config.json, which app/main.py loads.
+Writes model.pt and config.json into a new folder under model_runs/.
+Copy the chosen run's two files into model/ to serve it with app/main.py.
 
 Look for TODO. The training loop is given; the decisions are yours.
 """
 import argparse
 import json
 import os
+from tempfile import mkdtemp
 
 import numpy as np
 import pandas as pd
@@ -71,8 +73,11 @@ with torch.no_grad():
     val_mae = mae(net(Xvt).numpy(), yv)
 print(f"network {hidden}:            {val_mae:.2f} days")
 
-os.makedirs("model", exist_ok=True)
-torch.save(net.state_dict(), "model/model.pt")
-json.dump(dict(team=a.team, hidden=list(hidden), mu=mu.tolist(), sd=sd.tolist(),
-               features=FEATURES, val_mae=round(val_mae, 2)), open("model/config.json", "w"), indent=2)
-print("saved model/model.pt and model/config.json")
+os.makedirs("model_runs", exist_ok=True)
+widths = ",".join(str(width) for width in hidden)
+run_dir = mkdtemp(prefix=f"team_{a.team:02d}_hidden_{widths}_", dir="model_runs")
+torch.save(net.state_dict(), os.path.join(run_dir, "model.pt"))
+with open(os.path.join(run_dir, "config.json"), "w") as config_file:
+    json.dump(dict(team=a.team, hidden=list(hidden), mu=mu.tolist(), sd=sd.tolist(),
+                   features=FEATURES, val_mae=round(val_mae, 2)), config_file, indent=2)
+print(f"Saved model and config to {run_dir}")

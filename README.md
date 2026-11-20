@@ -73,12 +73,12 @@ gap.** Rotate the roles (Builder, Measurer, Skeptic, Scribe) so everyone builds 
 - [x] Plot a histogram of every column, and `days_left` against each input. Which relationships are not straight lines?
 - [x] **Code (`train.py`):** write the glitch rule for each kind of impossible reading you find, and count the rows removed.
 - [x] Report the validation MAE (in days) of **baseline 1**, always predicting the mean.
-- [ ] **Code (`train.py`):** report the validation MAE of **baseline 2**, linear regression with `np.linalg.lstsq`. Plot predicted against true. Where is it most wrong?
+- [x] **Code (`train.py`):** report the validation MAE of **baseline 2**, linear regression with `np.linalg.lstsq`. Plot predicted against true. Where is it most wrong?
 - [x] Run `train.py` as it is and record the network's MAE.
 
 ### Mission 2: A small network, opened up
-- [ ] Predict, by hand, the parameters, float32 bytes and MACs of 5 → 32 → 32 → 1.
-- [ ] **Code (`train.py`):** normalise the inputs using the training rows only. Compare training with and without normalisation.
+- [x] Predict, by hand, the parameters, float32 bytes and MACs of 5 → 32 → 32 → 1.
+- [x] **Code (`train.py`):** normalise the inputs using the training rows only. Compare training with and without normalisation.
 - [ ] Train with hidden widths 4, 8, 16, 32 and 64, with one and two hidden layers (`--hidden 16` or `--hidden 32,32`). Plot validation MAE against parameters.
 - [ ] Compare training MAE with validation MAE for your chosen size. Is it overfitting?
 - [ ] Work out the per-layer table (parameters, bytes, MACs) by hand, then **code (`app/main.py`):** make `/model_info` compute it from the network itself.
