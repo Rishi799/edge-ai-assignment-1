@@ -1,5 +1,5 @@
 """
-app/main.py -- STARTER battery API. Look for TODO.
+app/main.py -- Team 16 battery API (Missions 1-4 complete).
 
     uvicorn app.main:app --host 0.0.0.0 --port 8000
 

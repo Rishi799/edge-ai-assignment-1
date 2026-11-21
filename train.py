@@ -5,7 +5,7 @@ train.py -- STARTER. Clean the data, fit baselines, train the network, save it f
 Writes model.pt and config.json into a new folder under model_runs/.
 Copy the chosen run's two files into model/ to serve it with app/main.py.
 
-Look for TODO. The training loop is given; the decisions are yours.
+The training loop is given; the glitch rule, baselines and normalisation are ours (Missions 1-2).
 """
 import argparse
 import json
@@ -26,8 +26,8 @@ a = ap.parse_args()
 hidden = tuple(int(h) for h in a.hidden.split(","))
 
 df = pd.read_csv(f"data/team_{a.team:02d}_train.csv")
-# TODO Mission 1: find the sensor glitches (plot every column first!) and write a rule that
-# marks them. Say in your report how many you found and why each rule is safe.
+# Mission 1: sensor glitches. 24 rows: battery 0 V (4), temperature -127 C (9), Wi-Fi 0 dBm (11).
+# Each rule is safe because no real reading can take that value (see MISSION_1_REPORT.md).
 bad = (
     (df["battery_v"] <= 0)
     | (df["temp_c"] < -20)
