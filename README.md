@@ -95,12 +95,12 @@ gap.** Rotate the roles (Builder, Measurer, Skeptic, Scribe) so everyone builds 
 
 ### Mission 4: Would it fit inside the doorbell?
 ESP32-S3: about 512 KB SRAM (roughly 300 KB free for your program), 8 MB PSRAM, 16 MB flash.
-- [ ] For your model: bytes for weights and biases as float32 and int8, and the largest activation memory needed at once.
+- [x] For your model: bytes for weights and biases as float32 and int8, and the largest activation memory needed at once.
 - [x] **Code (`app/main.py`):** add `total_bytes_int8`, `fits_300kb_sram_f32` and `fits_300kb_sram_int8` to `/model_info`.
-- [ ] Use the same function to fill in the table for 5 → w → w → 1 at w = 32, 128, 256, 512 and 2048: parameters, float32 size, int8 size, fits in 300 KB SRAM (float32 and int8), fits in 8 MB PSRAM, MACs.
-- [ ] Find the exact width where the weights stop fitting in 300 KB, at float32 and at int8.
-- [ ] Estimate one prediction's time on the board. State the speed you assume and where it came from.
-- [ ] Argue: should the doorbell call your server or run the model itself? Use latency, privacy, cost, power, and what happens when the Wi-Fi is down.
+- [x] Use the same function to fill in the table for 5 → w → w → 1 at w = 32, 128, 256, 512 and 2048: parameters, float32 size, int8 size, fits in 300 KB SRAM (float32 and int8), fits in 8 MB PSRAM, MACs.
+- [x] Find the exact width where the weights stop fitting in 300 KB, at float32 and at int8.
+- [x] Estimate one prediction's time on the board. State the speed you assume and where it came from.
+- [x] Argue: should the doorbell call your server or run the model itself? Use latency, privacy, cost, power, and what happens when the Wi-Fi is down.
 
 ---
 
