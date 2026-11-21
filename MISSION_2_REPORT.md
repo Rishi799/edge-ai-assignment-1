@@ -73,9 +73,18 @@ All with normalisation, 1500 epochs, seed 0. Runs are saved in `model_runs/`; th
   network build the curved shapes we saw in Mission 1 (battery S-curve, 1/rings) far more cheaply.
 - **Two layers: diminishing returns after 16,16.** 32,32 has 3.3× the parameters for 0.06 days better;
   64,64 has 12× the parameters for 0.32 days better.
-- **Open question for our Skeptic:** one-layer widths 8 and 64 both scored exactly 15.42. Bigger one-layer
-  nets should usually do no worse. ✏️ Rerun `python train.py --team 16 --hidden 64` and check whether the
-  number repeats (and whether the val MAE is still falling at epoch 1499, i.e. undertrained).
+- **Skeptic check: why do one-layer widths 8 and 64 both score 15.42?** We retrained both and printed
+  4 decimals: width 8 → **15.4157**, width 64 → **15.4217**. They're different models that happen to round
+  to the same number, not a copied run. Both **underfit** (train ≈ 15.8, val ≈ 15.4: training error is
+  as bad as validation error), so adding width to a single hidden layer didn't help in 1500 epochs.
+  The limit is the shape of the network (one layer of ReLUs), not its size.
+
+**Reproducibility note.** We retrained some runs on another machine (PyTorch 2.15, Python 3.11):
+16,16 → **4.97** (identical), one-layer 32 → 9.98 (vs 9.96), 32,32 normalised → **4.97** (vs 4.91), and
+32,32 without normalisation → **10.99** (vs 9.59 in the Mission 1 report). Small differences come from
+different PyTorch versions doing floating-point arithmetic in slightly different orders. Without
+normalisation, training is less stable, so it moves the most. The conclusions don't change:
+normalisation roughly halves the error, and 16,16 ≈ 32,32.
 
 ---
 
