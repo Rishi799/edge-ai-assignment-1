@@ -24,6 +24,8 @@ CASES = [
     ("age_months missing", {k: v for k, v in GOOD.items() if k != "age_months"}, 422),
     ("temp_c is text", {**GOOD, "temp_c": "hot"}, 422),
     ("temp_c NaN", {**GOOD, "temp_c": float("nan")}, 422),
+    ("rings_per_day is true (boolean)", {**GOOD, "rings_per_day": True}, 422),
+    ("battery_v is the text '3.86'", {**GOOD, "battery_v": "3.86"}, 422),
     ("heatwave 49 C (real, outside our data)", {**GOOD, "temp_c": 49.0}, 200),
     ("battery 3.30 V (real, below our data)", {**GOOD, "battery_v": 3.30}, 200),
     ("bench.py extremes", {"battery_v": 3.4, "temp_c": 10.0, "rings_per_day": 29,

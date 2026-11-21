@@ -16,7 +16,7 @@ import numpy as np
 import torch
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, ValidationError
 
 from app.model import FEATURES, BatteryNet
 
@@ -34,20 +34,22 @@ class Reading(BaseModel):
     # reading just outside the training data still gets an answer while a glitch gets HTTP 422.
     # ge = "greater or equal", le = "less or equal", lt = "strictly less than".
     model_config = ConfigDict(allow_inf_nan=False)  # NaN / Infinity are never real readings
+    # StrictFloat: only real JSON numbers (5 or 5.0) are accepted. Plain `float` would quietly turn
+    # `true` into 1.0 and the text "3.86" into 3.86, answering a broken reading instead of refusing it.
 
     # Single Li-ion cell: dead/cut-off around 2.5-3.0 V, full charge 4.2 V (4.35 V for HV cells).
     # Glitch seen in our data: 0.0 V (disconnected ADC).
-    battery_v: float = Field(ge=2.5, le=4.5)
+    battery_v: StrictFloat = Field(ge=2.5, le=4.5)
     # Industrial electronics are rated -40..85 C, which covers any outdoor doorbell.
     # Glitch seen in our data: -127 C (DS18B20 "sensor not responding" code).
-    temp_c: float = Field(ge=-40, le=85)
+    temp_c: StrictFloat = Field(ge=-40, le=85)
     # A count, so never negative. 1000 rings a day is already far beyond a busy front door.
-    rings_per_day: float = Field(ge=0, le=1000)
+    rings_per_day: StrictFloat = Field(ge=0, le=1000)
     # Wi-Fi RSSI is always negative: about -120 dBm is below any receiver's sensitivity, and even
     # right next to the router it stays below about -10 dBm. Glitch seen in our data: 0 dBm.
-    wifi_rssi_dbm: float = Field(ge=-120, le=-10)
+    wifi_rssi_dbm: StrictFloat = Field(ge=-120, le=-10)
     # Age can't be negative; 240 months (20 years) is far beyond a doorbell's life.
-    age_months: float = Field(ge=0, le=240)
+    age_months: StrictFloat = Field(ge=0, le=240)
 
 
 class Batch(BaseModel):
