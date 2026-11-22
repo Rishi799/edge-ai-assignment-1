@@ -27,7 +27,7 @@ hidden = tuple(int(h) for h in a.hidden.split(","))
 
 df = pd.read_csv(f"data/team_{a.team:02d}_train.csv")
 # Mission 1: sensor glitches. 24 rows: battery 0 V (4), temperature -127 C (9), Wi-Fi 0 dBm (11).
-# Each rule is safe because no real reading can take that value (see MISSION_1_REPORT.md).
+# Below -20 C removed nine training rows, all at -127 C. The API assumes a -40..85 C operating range.
 bad = (
     (df["battery_v"] <= 0)
     | (df["temp_c"] < -20)

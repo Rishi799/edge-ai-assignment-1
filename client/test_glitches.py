@@ -52,7 +52,8 @@ def main():
         passed += got == want
         print(f"{mark} {name:40s} expected {want}, got {got}  {why}")
     print(f"\n{passed}/{len(CASES)} as expected")
+    return 0 if passed == len(CASES) else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

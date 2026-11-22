@@ -29,7 +29,7 @@ from our data's min and max, so a real reading slightly outside our data still g
 | Field | Range accepted | Why | Glitch in our data |
 |---|---|---|---|
 | `battery_v` | 2.5 to 4.5 V | Li-ion cut-off is about 2.5–3.0 V; full charge is 4.2 V (4.35 V for HV cells) | 0.0 V |
-| `temp_c` | -40 to 85 °C | Industrial electronics rating, covers any outdoor doorbell | -127 °C (DS18B20 error code) |
+| `temp_c` | -40 to 85 °C | Assumed API operating range. The training filter below −20 °C removed nine rows, all at −127 °C. | −127 °C |
 | `rings_per_day` | 0 to 1000 | A count can't be negative; 1000/day is far beyond any front door | none |
 | `wifi_rssi_dbm` | -120 to -10 dBm | RSSI is always negative; -120 is below any receiver's sensitivity, about -10 is right next to the router | 0 dBm |
 | `age_months` | 0 to 240 | Can't be negative; 20 years is far beyond a doorbell's life | none |
@@ -135,7 +135,7 @@ python client/bench.py --url http://localhost:8000 --n 200      # inside the Cod
 | server_total | 0.376 / 0.490 / 0.591 | 0.373 / 0.485 / 0.563 | 0.234 / 0.505 / 1.030 |
 | network_and_framework | 40.40 / 310.24 / 700.00 | 593.83 / 1688.71 / 2547.17 | 1.84 / 3.72 / 4.83 |
 
-The inside-Codespace run is saved in the Codespace as `bench_20261120_185806.csv` (Codespace clock is UTC).
+The inside-Codespace column and §6.3 retain previously reported values. The source CSV could not be recovered for verification. Its reported filename was `bench_20261120_185806.csv` (Codespace clock is UTC).
 
 **Live checks on the public address (same day):** `client/test_glitches.py` → 12/12 as expected,
 and our imitation of the grading checks → Health, model_info, Broken readings, Stage timing and
@@ -199,7 +199,7 @@ far more time (and radio power) than the prediction.
 **6.2 Why is the first request slower? (585 ms vs 41 ms typical)**
 It pays the same connection setup (TCP + TLS + proxy route) that every `--no-keepalive` request pays.
 The two numbers match: the first keep-alive request (585 ms) is close to a typical no-keepalive
-request (594 ms). The server isn't the cause: `server_total` is under 1 ms on every request.
+request (594 ms). In the no-keep-alive CSV, server processing took 0.373 ms at p50 and 0.485 ms at p95, peaking at 2.039 ms at index 102.
 
 **6.3 Why is localhost inside the Codespace faster than laptop → Codespace?**
 **2.1 ms vs 40.9 ms at p50 (about 19× faster), and a 6.5 ms first request vs 585 ms.** Inside the

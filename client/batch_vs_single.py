@@ -25,6 +25,8 @@ def main():
     ap.add_argument("--url", required=True)
     ap.add_argument("--n", type=int, default=400)
     a = ap.parse_args()
+    if not 1 <= a.n <= 10000:
+        ap.error("--n must be between 1 and 10000")
     url = a.url.rstrip("/")
     r = np.random.default_rng(2)         # fixed seed: the same readings every run
     rows = [reading(r) for _ in range(a.n)]
@@ -57,9 +59,13 @@ def main():
           f"({batch_ms / a.n:.3f} ms per reading, server busy {body['timings_ms']['server_total']:.1f} ms of it)")
     print(f"batch server stages     : {body['timings_ms']}")
     print(f"speed-up                : {single_ms / batch_ms:.1f}x")
+    if len(single) != a.n or len(batch) != a.n:
+        print(f"Expected {a.n} predictions each, got {len(single)} single and {len(batch)} batch")
+        return 1
     diff = max(abs(x - y) for x, y in zip(single, batch))
     print(f"same answers?           : {'yes' if diff == 0 else 'NO'} (largest difference {diff} days)")
+    return 0 if single == batch else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

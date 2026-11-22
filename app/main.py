@@ -40,8 +40,8 @@ class Reading(BaseModel):
     # Single Li-ion cell: dead/cut-off around 2.5-3.0 V, full charge 4.2 V (4.35 V for HV cells).
     # Glitch seen in our data: 0.0 V (disconnected ADC).
     battery_v: StrictFloat = Field(ge=2.5, le=4.5)
-    # Industrial electronics are rated -40..85 C, which covers any outdoor doorbell.
-    # Glitch seen in our data: -127 C (DS18B20 "sensor not responding" code).
+    # Assumed API operating range: -40..85 C.
+    # The training filter below -20 C removed nine rows, all at -127 C.
     temp_c: StrictFloat = Field(ge=-40, le=85)
     # A count, so never negative. 1000 rings a day is already far beyond a busy front door.
     rings_per_day: StrictFloat = Field(ge=0, le=1000)
@@ -143,11 +143,19 @@ async def run(request: Request, schema):
     return body
 
 
-@app.post("/predict")
+def json_body(schema):
+    return {"requestBody": {"required": True, "content": {"application/json": {"schema": schema}}}}
+
+
+batch_schema = Batch.model_json_schema()
+batch_schema["properties"]["rows"]["items"] = batch_schema.pop("$defs")["Reading"]
+
+
+@app.post("/predict", openapi_extra=json_body(Reading.model_json_schema()))
 async def predict(request: Request):
     return await run(request, Reading)
 
 
-@app.post("/predict_batch")
+@app.post("/predict_batch", openapi_extra=json_body(batch_schema))
 async def predict_batch(request: Request):
     return await run(request, Batch)
