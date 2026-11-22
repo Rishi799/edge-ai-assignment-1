@@ -126,16 +126,16 @@ python client/bench.py --url http://localhost:8000 --n 200      # inside the Cod
 
 | Stage (p50 / p95 / p99 ms) | Laptop → Codespace | Laptop → Codespace, `--no-keepalive` | Inside Codespace (localhost) |
 |---|---|---|---|
-| **first request** | **584.8** | **681.4** | **6.5** |
-| round_trip | 40.87 / 310.61 / 700.50 | 594.24 / 1689.21 / 2547.55 | 2.13 / 4.12 / 5.20 |
-| parse | 0.051 / 0.066 / 0.084 | 0.047 / 0.071 / 0.078 | 0.027 / 0.179 / 0.435 |
-| normalise | 0.046 / 0.067 / 0.084 | 0.047 / 0.076 / 0.084 | 0.022 / 0.033 / 0.056 |
-| inference | 0.230 / 0.321 / 0.371 | 0.228 / 0.303 / 0.363 | 0.130 / 0.205 / 0.364 |
-| build | 0.021 / 0.036 / 0.060 | 0.020 / 0.028 / 0.053 | 0.016 / 0.018 / 0.030 |
-| server_total | 0.376 / 0.490 / 0.591 | 0.373 / 0.485 / 0.563 | 0.234 / 0.505 / 1.030 |
-| network_and_framework | 40.40 / 310.24 / 700.00 | 593.83 / 1688.71 / 2547.17 | 1.84 / 3.72 / 4.83 |
+| **first request** | **584.8** | **681.4** | **480.7** |
+| round_trip | 40.87 / 310.61 / 700.50 | 594.24 / 1689.21 / 2547.55 | 1.31 / 1.93 / 2.73 |
+| parse | 0.051 / 0.066 / 0.084 | 0.047 / 0.071 / 0.078 | 0.021 / 0.094 / 0.164 |
+| normalise | 0.046 / 0.067 / 0.084 | 0.047 / 0.076 / 0.084 | 0.017 / 0.023 / 0.024 |
+| inference | 0.230 / 0.321 / 0.371 | 0.228 / 0.303 / 0.363 | 0.088 / 0.132 / 0.172 |
+| build | 0.021 / 0.036 / 0.060 | 0.020 / 0.028 / 0.053 | 0.013 / 0.018 / 0.042 |
+| server_total | 0.376 / 0.490 / 0.591 | 0.373 / 0.485 / 0.563 | 0.180 / 0.258 / 0.344 |
+| network_and_framework | 40.40 / 310.24 / 700.00 | 593.83 / 1688.71 / 2547.17 | 1.15 / 1.67 / 2.41 |
 
-The inside-Codespace column and §6.3 retain previously reported values. The source CSV could not be recovered for verification. Its reported filename was `bench_20261120_185806.csv` (Codespace clock is UTC).
+The inside-Codespace run used 200 requests to `http://localhost:8000`. The first request is shown separately. Percentiles use requests 2–200. [Inside-Codespace CSV](bench_20261122_142434.csv)
 
 **Live checks on the public address (same day):** `client/test_glitches.py` → 12/12 as expected,
 and our imitation of the grading checks → Health, model_info, Broken readings, Stage timing and
@@ -202,18 +202,13 @@ The two numbers match: the first keep-alive request (585 ms) is close to a typic
 request (594 ms). In the no-keep-alive CSV, server processing took 0.373 ms at p50 and 0.485 ms at p95, peaking at 2.039 ms at index 102.
 
 **6.3 Why is localhost inside the Codespace faster than laptop → Codespace?**
-**2.1 ms vs 40.9 ms at p50 (about 19× faster), and a 6.5 ms first request vs 585 ms.** Inside the
-Codespace the request never leaves the machine: no internet distance, no TLS (plain `http://`), and
-no GitHub port-forwarding proxy. What's left (1.84 ms of network + framework) is just Python's
-`requests` library and uvicorn/FastAPI handling HTTP on one computer. That's close to our laptop-only
-run (2.9 ms round trip, 2.56 ms network + framework).
+The median round trip was **1.31 ms** inside the Codespace and **40.87 ms**
+from the laptop over Wi-Fi. The first requests took 480.7 ms and 584.8 ms,
+respectively. Localhost uses plain HTTP over loopback and avoids the internet and GitHub forwarding proxy.
 
-The server's own work is **the same order in every column**, well under 1 ms (p50 `server_total`
-0.23–0.38 ms). So the 39 ms gap between "laptop → Codespace" and "inside Codespace" is network, not
-our code. The inside run is even a little faster (0.23 vs 0.38 ms). A likely reason: here requests
-arrive back-to-back every ~2 ms, so the CPU stays busy and its caches stay warm, while over the
-internet the server sits idle about 40 ms between requests. Its p99 (1.03 ms) is a little higher
-because the benchmark client and the server share the same small Codespace CPU.
+Median server processing took 0.180 ms inside the Codespace and 0.376 ms
+from the laptop. The median time outside server processing fell from 40.40 ms to
+1.15 ms on localhost, where both the HTTP client and server ran on the same machine.
 
 **6.4 Why is one batch 263× faster than 400 singles? (22.1 s vs 84 ms)**
 400 singles = **400 trips** over the internet, each paying about 41–55 ms of network + framework time.
